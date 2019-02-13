@@ -1,4 +1,4 @@
-Marlin 2.0 configuration for JGAurora A5S/A5 with 32bit MKS Sbase
+Marlin 2.0 configuration for JGAurora A5S/A5 with 32bit MKS Sbase, E3D V6 and Titan Extruder
 
 
 # Marlin 3D Printer Firmware
