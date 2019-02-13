@@ -1,3 +1,6 @@
+Marlin 2.0 configuration for JGAurora A5S/A5 with 32bit MKS Sbase
+
+
 # Marlin 3D Printer Firmware
 
 [![Build Status](https://travis-ci.org/MarlinFirmware/Marlin.svg?branch=RCBugFix)](https://travis-ci.org/MarlinFirmware/Marlin)
