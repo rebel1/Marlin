@@ -640,7 +640,7 @@
 #define DIGIPOT_I2C_NUM_CHANNELS 5 // 5DPRINT: 4     AZTEEG_X3_PRO: 8     MKS SBASE: 5
 // Actual motor currents in Amps. The number of entries must match DIGIPOT_I2C_NUM_CHANNELS.
 // These correspond to the physical drivers, so be mindful if the order is changed.
-#define DIGIPOT_I2C_MOTOR_CURRENTS { 0.8, 0.8, 1.0, 0.8, 1.0 }  //  MKS SBASE: 5
+#define DIGIPOT_I2C_MOTOR_CURRENTS { 0.7, 0.7, 1.0, 0.8, 1.0 }  //  MKS SBASE: 5
 
 //===========================================================================
 //=============================Additional Features===========================
@@ -986,7 +986,7 @@
  */
 //#define LIN_ADVANCE
 #if ENABLED(LIN_ADVANCE)
-  #define LIN_ADVANCE_K 0.22  // Unit: mm compression per 1mm/s extruder speed
+  #define LIN_ADVANCE_K 0  // Unit: mm compression per 1mm/s extruder speed
   //#define LA_DEBUG          // If enabled, this will generate debug information output over USB.
 #endif
 
@@ -1057,7 +1057,7 @@
  *
  * Override the default value based on the driver type set in Configuration.h.
  */
-#define MINIMUM_STEPPER_DIR_DELAY 650
+#define MINIMUM_STEPPER_DIR_DELAY 1000
 
 /**
  * Minimum stepper driver pulse width (in µs)
@@ -1550,7 +1550,7 @@
    * M906 - Set or get motor current in milliamps using axis codes X, Y, Z, E. Report values if no axis codes given.
    * M911 - Report stepper driver overtemperature pre-warn condition.
    * M912 - Clear stepper driver overtemperature pre-warn condition flag.
-   * M122 S0/1 - Report driver parameters (Requires TMC_DEBUG)
+   * M122 - Report driver parameters (Requires TMC_DEBUG)
    */
   //#define MONITOR_DRIVER_STATUS
 

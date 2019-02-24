@@ -689,14 +689,14 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4[, E5]]]]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 157.80, 157.8, 1600, 790 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 160, 160, 1600, 790 }
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4[, E5]]]]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 500, 120, 6, 60 }
+#define DEFAULT_MAX_FEEDRATE          { 500, 300, 6, 60 }
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -704,7 +704,7 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4[, E5]]]]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 1000, 1000, 100, 5000 }
+#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 100, 5000 }
 
 /**
  * Default Acceleration (change/s) change = mm/s
@@ -714,16 +714,16 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION          800    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  800    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   1000    // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  2000    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration for travel (non printing) moves
 
 //
 // Use Junction Deviation instead of traditional Jerk Limiting
 //
 #define JUNCTION_DEVIATION
 #if ENABLED(JUNCTION_DEVIATION)
-  #define JUNCTION_DEVIATION_MM 0.02  // (mm) Distance from real junction edge
+  #define JUNCTION_DEVIATION_MM 0.04  // (mm) Distance from real junction edge
 #endif
 
 /**
@@ -750,7 +750,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-//#define S_CURVE_ACCELERATION
+#define S_CURVE_ACCELERATION
 
 //===========================================================================
 //============================= Z Probe Options =============================
