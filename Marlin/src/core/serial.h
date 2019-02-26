@@ -42,10 +42,6 @@ enum MarlinDebugFlags : uint8_t {
 extern uint8_t marlin_debug_flags;
 #define DEBUGGING(F) (marlin_debug_flags & (MARLIN_DEBUG_## F))
 
-#if TX_BUFFER_SIZE < 1
-  #define SERIAL_FLUSHTX()
-#endif
-
 #if NUM_SERIAL > 1
   extern int8_t serial_port_index;
   #define _PORT_REDIRECT(n,p)   REMEMBER(n,serial_port_index,p)
@@ -72,8 +68,11 @@ extern uint8_t marlin_debug_flags;
 #define SERIAL_PRINTLN(x,b)     SERIAL_OUT(println, x, b)
 #define SERIAL_PRINTF(args...)  SERIAL_OUT(printf, args)
 #define SERIAL_FLUSH()          SERIAL_OUT(flush)
+
 #if TX_BUFFER_SIZE > 0
   #define SERIAL_FLUSHTX()      SERIAL_OUT(flushTX)
+#else
+  #define SERIAL_FLUSHTX()
 #endif
 
 #define SERIAL_ECHOPGM(x)                   (serialprintPGM(PSTR(x)))
