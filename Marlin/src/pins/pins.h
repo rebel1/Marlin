@@ -334,6 +334,8 @@
   #include "pins_BIQU_SKR_V1.1.h"     // LPC1768                                    env:LPC1768
 #elif MB(BIQU_B300_V1_0)
   #include "pins_BIQU_B300_V1.0.h"    // LPC1768                                    env:LPC1768
+#elif MB(BIGTREE_SKR_V1_3)
+  #include "pins_BIGTREE_SKR_V1.3.h"  // LPC1768                                    env:LPC1768
 
 //
 // Other 32-bit Boards
@@ -393,6 +395,8 @@
   #include "pins_ALLIGATOR_R2.h"      // SAM3X8E                                    env:DUE env:DUE_debug
 #elif MB(ADSK)
   #include "pins_ADSK.h"              // SAM3X8E                                    env:DUE env:DUE_debug
+#elif MB(PRINTRBOARD_G2)
+  #include "pins_PRINTRBOARD_G2.h"    // SAM3X8C                                    env:DUE_USB
 
 //
 // STM32 ARM Cortex-M3
