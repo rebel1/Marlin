@@ -640,7 +640,7 @@
 #define DIGIPOT_I2C_NUM_CHANNELS 5 // 5DPRINT: 4     AZTEEG_X3_PRO: 8     MKS SBASE: 5
 // Actual motor currents in Amps. The number of entries must match DIGIPOT_I2C_NUM_CHANNELS.
 // These correspond to the physical drivers, so be mindful if the order is changed.
-#define DIGIPOT_I2C_MOTOR_CURRENTS { 0.7, 0.7, 1.0, 0.8, 1.0 }  //  MKS SBASE: 5
+#define DIGIPOT_I2C_MOTOR_CURRENTS { 0.9, 0.9, 1.0, 0.9, 1.0 }  //  MKS SBASE: 5
 
 //===========================================================================
 //=============================Additional Features===========================
