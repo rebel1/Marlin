@@ -192,7 +192,25 @@ millis_t next_button_update_ms;
 
   #endif
 
-#endif
+  void wrap_string(uint8_t y, const char * const string) {
+    uint8_t x = LCD_WIDTH;
+    if (string) {
+      uint8_t *p = (uint8_t*)string;
+      for (;;) {
+        if (x >= LCD_WIDTH) {
+          x = 0;
+          SETCURSOR(0, y++);
+        }
+        wchar_t ch;
+        p = get_utf8_value_cb(p, read_byte_ram, &ch);
+        if (!ch) break;
+        lcd_put_wchar(ch);
+        x++;
+      }
+    }
+  }
+
+#endif // HAS_LCD_MENU
 
 void MarlinUI::init() {
 
@@ -809,10 +827,13 @@ void MarlinUI::update() {
     #if HAS_LCD_MENU && ENABLED(SCROLL_LONG_FILENAMES)
       // If scrolling of long file names is enabled and we are in the sd card menu,
       // cause a refresh to occur until all the text has scrolled into view.
-      if (currentScreen == menu_sdcard && filename_scroll_pos < filename_scroll_max && !lcd_status_update_delay--) {
-        lcd_status_update_delay = 6;
+      if (currentScreen == menu_sdcard && !lcd_status_update_delay--) {
+        lcd_status_update_delay = 4;
+        if (++filename_scroll_pos > filename_scroll_max) {
+          filename_scroll_pos = 0;
+          lcd_status_update_delay = 12;
+        }
         refresh(LCDVIEW_REDRAW_NOW);
-        filename_scroll_pos++;
         #if LCD_TIMEOUT_TO_STATUS
           return_to_status_ms = ms + LCD_TIMEOUT_TO_STATUS;
         #endif
