@@ -58,11 +58,11 @@ void safe_delay(millis_t ms) {
   #define MINUSOR(n, alt) (n >= 0 ? (alt) : (n = -n, '-'))
 
   // Convert a full-range unsigned 8bit int to a percentage
-  char* ui8tostr_percent(const uint8_t i) {
-    const uint8_t percent = ui8_to_percent(i);
-    conv[3] = RJDIGIT(percent, 100);
-    conv[4] = RJDIGIT(percent, 10);
-    conv[5] = DIGIMOD(percent, 1);
+  char* ui8tostr4pct(const uint8_t i) {
+    const uint8_t n = ui8_to_percent(i);
+    conv[3] = RJDIGIT(n, 100);
+    conv[4] = RJDIGIT(n, 10);
+    conv[5] = DIGIMOD(n, 1);
     conv[6] = '%';
     return &conv[3];
   }
@@ -159,6 +159,18 @@ void safe_delay(millis_t ms) {
     conv[5] = DIGIMOD(i, 10);
     conv[6] = DIGIMOD(i, 1);
     return &conv[3];
+  }
+
+  // Convert signed float to fixed-length string with 12.34 / -2.34 format or 123.45 / -23.45 format
+  char* ftostr42_52(const float &f) {
+    if (f <= -10 || f >= 100) return ftostr52(f); // need more digits
+    long i = (f * 1000 + (f < 0 ? -5: 5)) / 10;
+    conv[2] = (f >= 0 && f < 10) ? ' ' : MINUSOR(i, DIGIMOD(i, 1000));
+    conv[3] = DIGIMOD(i, 100);
+    conv[4] = '.';
+    conv[5] = DIGIMOD(i, 10);
+    conv[6] = DIGIMOD(i, 1);
+    return &conv[2];
   }
 
   // Convert signed float to fixed-length string with 023.45 / -23.45 format
@@ -264,15 +276,15 @@ void safe_delay(millis_t ms) {
     return conv;
   }
 
-  // Convert unsigned float to string with 1234.56 format omitting trailing zeros
-  char* ftostr62rj(const float &f) {
-    const long i = ((f < 0 ? -f : f) * 1000 + 5) / 10;
-    conv[0] = RJDIGIT(i, 100000);
+  // Convert unsigned float to string with 1234.5 format omitting trailing zeros
+  char* ftostr51rj(const float &f) {
+    const long i = ((f < 0 ? -f : f) * 100 + 5) / 10;
+    conv[0] = ' ';
     conv[1] = RJDIGIT(i, 10000);
     conv[2] = RJDIGIT(i, 1000);
-    conv[3] = DIGIMOD(i, 100);
-    conv[4] = '.';
-    conv[5] = DIGIMOD(i, 10);
+    conv[3] = RJDIGIT(i, 100);
+    conv[4] = DIGIMOD(i, 10);
+    conv[5] = '.';
     conv[6] = DIGIMOD(i, 1);
     return conv;
   }

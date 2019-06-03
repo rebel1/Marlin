@@ -64,7 +64,7 @@ void Babystep::add_mm(const AxisEnum axis, const float &mm) {
   add_steps(axis, mm * planner.settings.axis_steps_per_mm[axis]);
 }
 
-void Babystep::add_steps(const AxisEnum axis, const int32_t distance) {
+void Babystep::add_steps(const AxisEnum axis, const int16_t distance) {
 
   #if ENABLED(BABYSTEP_WITHOUT_HOMING)
     #define CAN_BABYSTEP(AXIS) true
@@ -83,7 +83,7 @@ void Babystep::add_steps(const AxisEnum axis, const int32_t distance) {
   #endif
 
   #if ENABLED(BABYSTEP_ALWAYS_AVAILABLE)
-    #define BSA_ENABLE(AXIS) do{ switch (AXIS) { case X_AXIS: enable_X(); break; case Y_AXIS: enable_Y(); break; case Z_AXIS: enable_Z(); } }while(0)
+    #define BSA_ENABLE(AXIS) do{ switch (AXIS) { case X_AXIS: enable_X(); break; case Y_AXIS: enable_Y(); break; case Z_AXIS: enable_Z(); break; default: break; } }while(0)
   #else
     #define BSA_ENABLE(AXIS) NOOP
   #endif
