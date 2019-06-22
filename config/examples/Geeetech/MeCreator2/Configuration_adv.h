@@ -604,6 +604,10 @@
   #define Z_STEPPER_ALIGN_ITERATIONS 3
   // Enable to restore leveling setup after operation
   #define RESTORE_LEVELING_AFTER_G34
+
+  // On a 300mm bed a 5% grade would give a misalignment of ~1.5cm
+  #define G34_MAX_GRADE  5  // (%) Maximum incline G34 will handle
+
   // Use the amplification factor to de-/increase correction step.
   // In case the stepper (spindle) position is further out than the test point
   // Use a value > 1. NOTE: This may cause instability
@@ -614,7 +618,7 @@
 
 // @section machine
 
-#define AXIS_RELATIVE_MODES {false, false, false, false}
+#define AXIS_RELATIVE_MODES { false, false, false, false }
 
 // Add a Duplicate option for well-separated conjoined nozzles
 //#define MULTI_NOZZLE_DUPLICATION
@@ -1726,6 +1730,29 @@
   //#define TMC_SW_SCK        -1
 
   /**
+   * Four TMC2209 drivers can use the same HW/SW serial port with hardware configured addresses.
+   * Set the address using jumpers on pins MS1 and MS2.
+   * Address | MS1  | MS2
+   *       0 | LOW  | LOW
+   *       1 | HIGH | LOW
+   *       2 | LOW  | HIGH
+   *       3 | HIGH | HIGH
+   */
+  #define  X_SLAVE_ADDRESS 0
+  #define  Y_SLAVE_ADDRESS 0
+  #define  Z_SLAVE_ADDRESS 0
+  #define X2_SLAVE_ADDRESS 0
+  #define Y2_SLAVE_ADDRESS 0
+  #define Z2_SLAVE_ADDRESS 0
+  #define Z3_SLAVE_ADDRESS 0
+  #define E0_SLAVE_ADDRESS 0
+  #define E1_SLAVE_ADDRESS 0
+  #define E2_SLAVE_ADDRESS 0
+  #define E3_SLAVE_ADDRESS 0
+  #define E4_SLAVE_ADDRESS 0
+  #define E5_SLAVE_ADDRESS 0
+
+  /**
    * Software enable
    *
    * Use for drivers that do not use a dedicated enable pin, but rather handle the same
@@ -2217,6 +2244,21 @@
  * Spend 28 bytes of SRAM to optimize the GCode parser
  */
 #define FASTER_GCODE_PARSER
+
+/**
+ * CNC G-code options
+ * Support CNC-style G-code dialects used by laser cutters, drawing machine cams, etc.
+ * Note that G0 feedrates should be used with care for 3D printing (if used at all).
+ * High feedrates may cause ringing and harm print quality.
+ */
+//#define PAREN_COMMENTS      // Support for parentheses-delimited comments
+//#define GCODE_MOTION_MODES  // Remember the motion mode (G0 G1 G2 G3 G5 G38.X) and apply for X Y Z E F, etc.
+
+// Enable and set a (default) feedrate for all G0 moves
+//#define G0_FEEDRATE 3000 // (mm/m)
+#ifdef G0_FEEDRATE
+  //#define VARIABLE_G0_FEEDRATE // The G0 feedrate is set by F in G0 motion mode
+#endif
 
 /**
  * G-code Macros
