@@ -392,7 +392,7 @@ bool MarlinUI::get_blink() {
         #if HAS_ENCODER_ACTION
           refresh(LCDVIEW_REDRAW_NOW);
           #if HAS_LCD_MENU
-            if (encoderDirection == -1) {     // ADC_KEYPAD forces REVERSE_MENU_DIRECTION, so this indicates menu navigation
+            if (encoderDirection == -(ENCODERBASE)) { // ADC_KEYPAD forces REVERSE_MENU_DIRECTION, so this indicates menu navigation
                    if (RRK(EN_KEYPAD_UP))     encoderPosition += ENCODER_STEPS_PER_MENU_ITEM;
               else if (RRK(EN_KEYPAD_DOWN))   encoderPosition -= ENCODER_STEPS_PER_MENU_ITEM;
               else if (RRK(EN_KEYPAD_LEFT))   { MenuItem_back::action(); quick_feedback(); }
@@ -480,7 +480,6 @@ bool MarlinUI::get_blink() {
 void MarlinUI::status_screen() {
 
   #if HAS_LCD_MENU
-    encoder_direction_normal();
     ENCODER_RATE_MULTIPLY(false);
   #endif
 
@@ -588,8 +587,8 @@ void MarlinUI::kill_screen(PGM_P lcd_msg) {
   #ifdef LED_BACKLIGHT_TIMEOUT
     leds.set_color(LEDColorRed());
     #ifdef NEOPIXEL_BKGD_LED_INDEX
-      pixels.setPixelColor(NEOPIXEL_BKGD_LED_INDEX, 255, 0, 0, 0);
-      pixels.show();
+      neo.set_pixel_color(NEOPIXEL_BKGD_LED_INDEX, 255, 0, 0, 0);
+      neo.show();
     #endif
   #endif
 
@@ -1468,7 +1467,7 @@ void MarlinUI::update() {
     #endif
     print_job_timer.stop();
     set_status_P(PSTR(MSG_PRINT_ABORTED));
-    #if HAS_SPI_LCD
+    #if HAS_LCD_MENU
       return_to_status();
     #endif
   }
