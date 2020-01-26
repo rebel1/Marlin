@@ -50,6 +50,7 @@
 #endif
 
 void configure_i2c(const uint8_t clock_option);
+
 #ifdef __cplusplus
   }
-#endif 
+#endif
