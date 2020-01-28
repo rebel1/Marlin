@@ -331,7 +331,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #if ENABLED(PROBE_TEMP_COMPENSATION)
         case 76: G76(); break;                                    // G76: Calibrate first layer compensation values
       #endif
-      
       #if ENABLED(GCODE_MOTION_MODES)
         case 80: G80(); break;                                    // G80: Reset the current motion mode
       #endif
