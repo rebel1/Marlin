@@ -1503,12 +1503,12 @@
  * Override if the automatically selected points are inadequate.
  */
 #if EITHER(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_UBL)
-  //#define PROBE_PT_1_X 20
-  //#define PROBE_PT_1_Y 275
-  //#define PROBE_PT_2_X 20
-  //#define PROBE_PT_2_Y 20
-  //#define PROBE_PT_3_X 275
-  //#define PROBE_PT_3_Y 20
+  //#define PROBE_PT_1_X 40
+  //#define PROBE_PT_1_Y 255
+  //#define PROBE_PT_2_X 40
+  //#define PROBE_PT_2_Y 40
+  //#define PROBE_PT_3_X 255
+  //#define PROBE_PT_3_Y 40
 #endif
 
 /**
@@ -3115,7 +3115,7 @@
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe
 //
-#define PINS_DEBUGGING
+//#define PINS_DEBUGGING
 
 // Enable Marlin dev mode which adds some special commands
 //#define MARLIN_DEV_MODE
