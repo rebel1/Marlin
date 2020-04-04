@@ -1,3 +1,5 @@
+Optimized firmware for Artillery Sidewinder X1 based on the Marlin bugfix 2.0.x branch.
+
 # Marlin 3D Printer Firmware
 
 ![GitHub](https://img.shields.io/github/license/marlinfirmware/marlin.svg)
