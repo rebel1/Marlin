@@ -56,8 +56,52 @@
   #undef SHOW_TEMP_ADC_VALUES
 #endif
 
-#if !NUM_SERIAL
-  #undef BAUD_RATE_GCODE
+#if EITHER(DUAL_X_CARRIAGE, MULTI_NOZZLE_DUPLICATION)
+  #define HAS_DUPLICATION_MODE 1
+#endif
+
+#if ENABLED(PRINTCOUNTER) && (SERVICE_INTERVAL_1 > 0 || SERVICE_INTERVAL_2 > 0 || SERVICE_INTERVAL_3 > 0)
+  #define HAS_SERVICE_INTERVALS 1
+#endif
+
+#if ENABLED(FILAMENT_RUNOUT_SENSOR)
+  #define HAS_FILAMENT_SENSOR 1
+#endif
+
+#if EITHER(SDSUPPORT, LCD_SET_PROGRESS_MANUALLY)
+  #define HAS_PRINT_PROGRESS 1
+#endif
+
+#if HAS_PRINT_PROGRESS && EITHER(PRINT_PROGRESS_SHOW_DECIMALS, SHOW_REMAINING_TIME)
+  #define HAS_PRINT_PROGRESS_PERMYRIAD 1
+#endif
+
+#if ANY(MARLIN_BRICKOUT, MARLIN_INVADERS, MARLIN_SNAKE, MARLIN_MAZE)
+  #define HAS_GAMES 1
+  #if (1 < ENABLED(MARLIN_BRICKOUT) + ENABLED(MARLIN_INVADERS) + ENABLED(MARLIN_SNAKE) + ENABLED(MARLIN_MAZE))
+    #define HAS_GAME_MENU 1
+  #endif
+#endif
+
+#if ANY(FWRETRACT, HAS_LEVELING, SKEW_CORRECTION)
+  #define HAS_POSITION_MODIFIERS 1
+#endif
+
+#if ANY(X_DUAL_ENDSTOPS, Y_DUAL_ENDSTOPS, Z_MULTI_ENDSTOPS)
+  #define HAS_EXTRA_ENDSTOPS 1
+#endif
+#if EITHER(MIN_SOFTWARE_ENDSTOPS, MAX_SOFTWARE_ENDSTOPS)
+  #define HAS_SOFTWARE_ENDSTOPS 1
+#endif
+#if ANY(EXTENSIBLE_UI, NEWPANEL, EMERGENCY_PARSER, HAS_ADC_BUTTONS)
+  #define HAS_RESUME_CONTINUE 1
+#endif
+
+#if ANY(BLINKM, RGB_LED, RGBW_LED, PCA9632, PCA9533, NEOPIXEL_LED)
+  #define HAS_COLOR_LEDS 1
+#endif
+#if ALL(HAS_RESUME_CONTINUE, PRINTER_EVENT_LEDS, SDSUPPORT)
+  #define HAS_LEDS_OFF_FLAG 1
 #endif
 
 // Multiple Z steppers
@@ -72,7 +116,23 @@
   #define Z_STEPPER_ALIGN_AMP 1.0
 #endif
 
-#define HAS_CUTTER EITHER(SPINDLE_FEATURE, LASER_FEATURE)
+//
+// Spindle/Laser power display types
+// Defined here so sanity checks can use them
+//
+#if EITHER(SPINDLE_FEATURE, LASER_FEATURE)
+  #define HAS_CUTTER 1
+  #define _CUTTER_DISP_PWM     1
+  #define _CUTTER_DISP_PERCENT 2
+  #define _CUTTER_DISP_RPM     3
+  #define _CUTTER_DISP(V)      _CAT(_CUTTER_DISP_, V)
+  #define CUTTER_DISPLAY_IS(V) (_CUTTER_DISP(CUTTER_POWER_DISPLAY) == _CUTTER_DISP(V))
+#endif
+
+// Add features that need hardware PWM here
+#if ANY(FAST_PWM_FAN, SPINDLE_LASER_PWM)
+  #define NEEDS_HARDWARE_PWM 1
+#endif
 
 #if !defined(__AVR__) || !defined(USBCON)
   // Define constants and variables for buffering serial data.
@@ -167,10 +227,14 @@
 #endif
 
 // If platform requires early initialization of watchdog to properly boot
-#define EARLY_WATCHDOG (ENABLED(USE_WATCHDOG) && defined(ARDUINO_ARCH_SAM))
+#if ENABLED(USE_WATCHDOG) && defined(ARDUINO_ARCH_SAM)
+  #define EARLY_WATCHDOG 1
+#endif
 
 // Extensible UI pin mapping for RepRapDiscount
-#define TOUCH_UI_ULTIPANEL ENABLED(TOUCH_UI_FTDI_EVE) && ANY(AO_EXP1_PINMAP, AO_EXP2_PINMAP, CR10_TFT_PINMAP)
+#if ENABLED(TOUCH_UI_FTDI_EVE) && ANY(AO_EXP1_PINMAP, AO_EXP2_PINMAP, CR10_TFT_PINMAP)
+  #define TOUCH_UI_ULTIPANEL 1
+#endif
 
 // Poll-based jogging for joystick and other devices
 #if ENABLED(JOYSTICK)
@@ -241,4 +305,18 @@
   #else
     #define MAXIMUM_STEPPER_RATE 250000
   #endif
+#endif
+
+//
+// SD Card connection methods
+// Defined here so pins and sanity checks can use them
+//
+#if ENABLED(SDSUPPORT)
+  #define _SDCARD_LCD          1
+  #define _SDCARD_ONBOARD      2
+  #define _SDCARD_CUSTOM_CABLE 3
+  #define _SDCARD_ID(V) _CAT(_SDCARD_, V)
+  #define SD_CONNECTION_IS(V) (_SDCARD_ID(SDCARD_CONNECTION) == _SDCARD_ID(V))
+#else
+  #define SD_CONNECTION_IS(...) 0
 #endif

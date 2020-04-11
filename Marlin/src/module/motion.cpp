@@ -55,6 +55,10 @@
   #include "../lcd/ultralcd.h"
 #endif
 
+#if HAS_FILAMENT_SENSOR
+  #include "../feature/runout.h"
+#endif
+
 #if ENABLED(SENSORLESS_HOMING)
   #include "../feature/tmc_util.h"
 #endif
@@ -206,15 +210,54 @@ xyz_pos_t cartes;
 /**
  * Output the current position to serial
  */
-void report_current_position() {
-  const xyz_pos_t lpos = current_position.asLogical();
-  SERIAL_ECHOPAIR("X:", lpos.x, " Y:", lpos.y, " Z:", lpos.z, " E:", current_position.e);
 
+inline void report_more_positions() {
   stepper.report_positions();
-
   #if IS_SCARA
     scara_report_positions();
   #endif
+}
+
+// Report the logical position for a given machine position
+inline void report_logical_position(const xyze_pos_t &rpos) {
+  const xyze_pos_t lpos = rpos.asLogical();
+  SERIAL_ECHOPAIR_P(X_LBL, lpos.x, SP_Y_LBL, lpos.y, SP_Z_LBL, lpos.z, SP_E_LBL, lpos.e);
+}
+
+// Report the real current position according to the steppers.
+// Forward kinematics and un-leveling are applied.
+void report_real_position() {
+  get_cartesian_from_steppers();
+  xyze_pos_t npos = cartes;
+  npos.e = planner.get_axis_position_mm(E_AXIS);
+
+  #if HAS_POSITION_MODIFIERS
+    planner.unapply_modifiers(npos
+      #if HAS_LEVELING
+        , true
+      #endif
+    );
+  #endif
+
+  report_logical_position(npos);
+  report_more_positions();
+}
+
+// Report the logical current position according to the most recent G-code command
+void report_current_position() {
+  report_logical_position(current_position);
+  report_more_positions();
+}
+
+/**
+ * Report the logical current position according to the most recent G-code command.
+ * The planner.position always corresponds to the last G-code too. This makes M114
+ * suitable for debugging kinematics and leveling while avoiding planner sync that
+ * definitively interrupts the printing flow.
+ */
+void report_current_position_projected() {
+  report_logical_position(current_position);
+  stepper.report_a_position(planner.position);
 }
 
 /**
@@ -241,11 +284,7 @@ void sync_plan_position_e() { planner.set_e_position_mm(current_position.e); }
  */
 void get_cartesian_from_steppers() {
   #if ENABLED(DELTA)
-    forward_kinematics_DELTA(
-      planner.get_axis_position_mm(A_AXIS),
-      planner.get_axis_position_mm(B_AXIS),
-      planner.get_axis_position_mm(C_AXIS)
-    );
+    forward_kinematics_DELTA(planner.get_axis_positions_mm());
   #else
     #if IS_SCARA
       forward_kinematics_SCARA(
@@ -296,6 +335,17 @@ void set_current_from_steppers_for_axis(const AxisEnum axis) {
 void line_to_current_position(const feedRate_t &fr_mm_s/*=feedrate_mm_s*/) {
   planner.buffer_line(current_position, fr_mm_s, active_extruder);
 }
+
+#if EXTRUDERS
+  void unscaled_e_move(const float &length, const feedRate_t &fr_mm_s) {
+    #if HAS_FILAMENT_SENSOR
+      runout.reset();
+    #endif
+    current_position.e += length / planner.e_factor[active_extruder];
+    line_to_current_position(fr_mm_s);
+    planner.synchronize();
+  }
+#endif
 
 #if IS_KINEMATIC
 
@@ -663,11 +713,11 @@ void restore_feedrate_and_scaling() {
 
 FORCE_INLINE void segment_idle(millis_t &next_idle_ms) {
   const millis_t ms = millis();
-  thermalManager.manage_heater();  // This returns immediately if not really needed.
   if (ELAPSED(ms, next_idle_ms)) {
     next_idle_ms = ms + 200UL;
-    idle();
+    return idle();
   }
+  thermalManager.manage_heater();  // Returns immediately on most calls
 }
 
 #if IS_KINEMATIC
@@ -1176,15 +1226,9 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
 
     #if ENABLED(SPI_ENDSTOPS)
       switch (axis) {
-        #if X_SPI_SENSORLESS
-          case X_AXIS: endstops.tmc_spi_homing.x = true; break;
-        #endif
-        #if Y_SPI_SENSORLESS
-          case Y_AXIS: endstops.tmc_spi_homing.y = true; break;
-        #endif
-        #if Z_SPI_SENSORLESS
-          case Z_AXIS: endstops.tmc_spi_homing.z = true; break;
-        #endif
+        case X_AXIS: if (ENABLED(X_SPI_SENSORLESS)) endstops.tmc_spi_homing.x = true; break;
+        case Y_AXIS: if (ENABLED(Y_SPI_SENSORLESS)) endstops.tmc_spi_homing.y = true; break;
+        case Z_AXIS: if (ENABLED(Z_SPI_SENSORLESS)) endstops.tmc_spi_homing.z = true; break;
         default: break;
       }
     #endif
@@ -1248,15 +1292,9 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
 
     #if ENABLED(SPI_ENDSTOPS)
       switch (axis) {
-        #if X_SPI_SENSORLESS
-          case X_AXIS: endstops.tmc_spi_homing.x = false; break;
-        #endif
-        #if Y_SPI_SENSORLESS
-          case Y_AXIS: endstops.tmc_spi_homing.y = false; break;
-        #endif
-        #if Z_SPI_SENSORLESS
-          case Z_AXIS: endstops.tmc_spi_homing.z = false; break;
-        #endif
+        case X_AXIS: if (ENABLED(X_SPI_SENSORLESS)) endstops.tmc_spi_homing.x = false; break;
+        case Y_AXIS: if (ENABLED(Y_SPI_SENSORLESS)) endstops.tmc_spi_homing.y = false; break;
+        case Z_AXIS: if (ENABLED(Z_SPI_SENSORLESS)) endstops.tmc_spi_homing.z = false; break;
         default: break;
       }
     #endif
@@ -1269,27 +1307,21 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
  */
 void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s=0.0) {
 
+  const feedRate_t real_fr_mm_s = fr_mm_s ?: homing_feedrate(axis);
+
   if (DEBUGGING(LEVELING)) {
     DEBUG_ECHOPAIR(">>> do_homing_move(", axis_codes[axis], ", ", distance, ", ");
     if (fr_mm_s)
       DEBUG_ECHO(fr_mm_s);
     else
-      DEBUG_ECHOPAIR("[", homing_feedrate(axis), "]");
+      DEBUG_ECHOPAIR("[", real_fr_mm_s, "]");
     DEBUG_ECHOLNPGM(")");
   }
 
   #if HOMING_Z_WITH_PROBE && HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
     // Wait for bed to heat back up between probing points
-    if (axis == Z_AXIS && distance < 0 && thermalManager.isHeatingBed()) {
-      serialprintPGM(probe.msg_wait_for_bed_heating);
-      #if HAS_DISPLAY
-        LCD_MESSAGEPGM(MSG_BED_HEATING);
-      #endif
-      thermalManager.wait_for_bed();
-      #if HAS_DISPLAY
-        ui.reset_status();
-      #endif
-    }
+    if (axis == Z_AXIS && distance < 0)
+      thermalManager.wait_for_bed_heating();
   #endif
 
   // Only do some things when moving towards an endstop
@@ -1316,7 +1348,6 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     #endif
   }
 
-  const feedRate_t real_fr_mm_s = fr_mm_s ?: homing_feedrate(axis);
   #if IS_SCARA
     // Tell the planner the axis is at 0
     current_position[axis] = 0;
@@ -1324,19 +1355,19 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     current_position[axis] = distance;
     line_to_current_position(real_fr_mm_s);
   #else
-    abce_pos_t target = { planner.get_axis_position_mm(A_AXIS), planner.get_axis_position_mm(B_AXIS), planner.get_axis_position_mm(C_AXIS), planner.get_axis_position_mm(E_AXIS) };
+    abce_pos_t target = planner.get_axis_positions_mm();
     target[axis] = 0;
     planner.set_machine_position_mm(target);
     target[axis] = distance;
 
-    #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-      const xyze_float_t delta_mm_cart{0};
+    #if HAS_DIST_MM_ARG
+      const xyze_float_t cart_dist_mm{0};
     #endif
 
     // Set delta/cartesian axes directly
     planner.buffer_segment(target
-      #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        , delta_mm_cart
+      #if HAS_DIST_MM_ARG
+        , cart_dist_mm
       #endif
       , real_fr_mm_s, active_extruder
     );
@@ -1448,13 +1479,13 @@ void set_axis_is_at_home(const AxisEnum axis) {
 /**
  * Set an axis' to be unhomed.
  */
-void set_axis_is_not_at_home(const AxisEnum axis) {
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> set_axis_is_not_at_home(", axis_codes[axis], ")");
+void set_axis_not_trusted(const AxisEnum axis) {
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> set_axis_not_trusted(", axis_codes[axis], ")");
 
   CBI(axis_known_position, axis);
   CBI(axis_homed, axis);
 
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("<<< set_axis_is_not_at_home(", axis_codes[axis], ")");
+  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("<<< set_axis_not_trusted(", axis_codes[axis], ")");
 
   #if ENABLED(I2C_POSITION_ENCODERS)
     I2CPEM.unhomed(axis);
@@ -1764,6 +1795,13 @@ void homeaxis(const AxisEnum axis) {
         #endif
         homing_feedrate(axis)
       );
+
+      #if ENABLED(SENSORLESS_HOMING)
+        planner.synchronize();
+        #if IS_CORE
+          if (axis != NORMAL_AXIS) safe_delay(200);  // Short delay to allow belts to spring back
+        #endif
+      #endif
     }
   #endif
 
