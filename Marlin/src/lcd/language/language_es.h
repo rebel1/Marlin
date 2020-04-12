@@ -186,8 +186,8 @@ namespace Language_es {
   PROGMEM Language_Str MSG_UBL_STORAGE_SLOT                = _UxGT("Huecos de memoria");
   PROGMEM Language_Str MSG_UBL_LOAD_MESH                   = _UxGT("Cargar Mallado cama");
   PROGMEM Language_Str MSG_UBL_SAVE_MESH                   = _UxGT("Guardar Mallado cama");
-  PROGMEM Language_Str MSG_MESH_LOADED                     = _UxGT("Mall. %i Carga.");
-  PROGMEM Language_Str MSG_MESH_SAVED                      = _UxGT("Mall. %i Guard.");
+  PROGMEM Language_Str MSG_MESH_LOADED                     = _UxGT("Malla %i Cargada");
+  PROGMEM Language_Str MSG_MESH_SAVED                      = _UxGT("Malla %i Guardada");
   PROGMEM Language_Str MSG_UBL_NO_STORAGE                  = _UxGT("Sin guardar");
   PROGMEM Language_Str MSG_UBL_SAVE_ERROR                  = _UxGT("Error: Guardar UBL");
   PROGMEM Language_Str MSG_UBL_RESTORE_ERROR               = _UxGT("Error: Restaurar UBL");
@@ -555,7 +555,7 @@ namespace Language_es {
 
   #if LCD_HEIGHT >= 4
     PROGMEM Language_Str MSG_ADVANCED_PAUSE_WAITING        = _UxGT(MSG_2_LINE("Pulsar el botón para", "reanudar impresión"));
-    PROGMEM Language_Str MSG_PAUSE_PRINT_INIT              = _UxGT(MSG_1_LINE("Aparcando..."));
+    PROGMEM Language_Str MSG_PAUSE_PRINT_PARKING           = _UxGT(MSG_1_LINE("Aparcando..."));
     PROGMEM Language_Str MSG_FILAMENT_CHANGE_INIT          = _UxGT(MSG_3_LINE("Esperando para", "iniciar el cambio", "de filamento"));
     PROGMEM Language_Str MSG_FILAMENT_CHANGE_INSERT        = _UxGT(MSG_3_LINE("Inserte el filamento", "y pulse el botón", "para continuar..."));
     PROGMEM Language_Str MSG_FILAMENT_CHANGE_HEAT          = _UxGT(MSG_2_LINE("Pulse el botón para", "calentar la boquilla"));
@@ -567,7 +567,7 @@ namespace Language_es {
     PROGMEM Language_Str MSG_FILAMENT_CHANGE_RESUME        = _UxGT(MSG_2_LINE("Esperando impresora", "para reanudar..."));
   #else
     PROGMEM Language_Str MSG_ADVANCED_PAUSE_WAITING        = _UxGT(MSG_1_LINE("Pulse para continuar"));
-    PROGMEM Language_Str MSG_PAUSE_PRINT_INIT              = _UxGT(MSG_1_LINE("Aparcando..."));
+    PROGMEM Language_Str MSG_PAUSE_PRINT_PARKING           = _UxGT(MSG_1_LINE("Aparcando..."));
     PROGMEM Language_Str MSG_FILAMENT_CHANGE_INIT          = _UxGT(MSG_1_LINE("Por Favor espere..."));
     PROGMEM Language_Str MSG_FILAMENT_CHANGE_INSERT        = _UxGT(MSG_1_LINE("Inserte y Pulse"));
     PROGMEM Language_Str MSG_FILAMENT_CHANGE_HEAT          = _UxGT(MSG_1_LINE("Pulse para Calentar"));
