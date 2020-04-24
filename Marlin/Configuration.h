@@ -485,9 +485,9 @@
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 
   // Sidewinder X1 bei 230° C    
-   #define DEFAULT_Kp 9.75 
-   #define DEFAULT_Ki 0.60 
-   #define DEFAULT_Kd 39.52
+   #define DEFAULT_Kp 10.91 
+   #define DEFAULT_Ki 0.70 
+   #define DEFAULT_Kd 42.44
 
   // MakerGear
   //#define DEFAULT_Kp 7.0
