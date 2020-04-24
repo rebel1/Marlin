@@ -2393,7 +2393,7 @@ void MarlinSettings::reset() {
     TERN_(HAS_CLASSIC_E_JERK, planner.max_jerk.e = DEFAULT_EJERK;);
   #endif
 
-  #if DISABLED(CLASSIC_JERK)
+  #if HAS_JUNCTION_DEVIATION
     planner.junction_deviation_mm = float(JUNCTION_DEVIATION_MM);
   #endif
 
@@ -2423,16 +2423,32 @@ void MarlinSettings::reset() {
 
   #if EXTRUDERS > 1
     #if ENABLED(TOOLCHANGE_FILAMENT_SWAP)
-      toolchange_settings.swap_length = TOOLCHANGE_FIL_SWAP_LENGTH;
-      toolchange_settings.extra_prime = TOOLCHANGE_FIL_EXTRA_PRIME;
-      toolchange_settings.prime_speed = TOOLCHANGE_FIL_SWAP_PRIME_SPEED;
-      toolchange_settings.retract_speed = TOOLCHANGE_FIL_SWAP_RETRACT_SPEED;
+      toolchange_settings.swap_length     = TOOLCHANGE_FS_LENGTH;
+      toolchange_settings.extra_resume    = TOOLCHANGE_FS_EXTRA_RESUME_LENGTH;
+      toolchange_settings.retract_speed   = TOOLCHANGE_FS_RETRACT_SPEED;
+      toolchange_settings.unretract_speed = TOOLCHANGE_FS_UNRETRACT_SPEED;
+      toolchange_settings.extra_prime     = TOOLCHANGE_FS_EXTRA_PRIME;
+      toolchange_settings.prime_speed     = TOOLCHANGE_FS_PRIME_SPEED;
+      toolchange_settings.fan_speed       = TOOLCHANGE_FS_FAN_SPEED;
+      toolchange_settings.fan_time        = TOOLCHANGE_FS_FAN_TIME;
     #endif
+
+    #if ENABLED(TOOLCHANGE_FS_PRIME_FIRST_USED)
+      enable_first_prime = false;
+    #endif
+
     #if ENABLED(TOOLCHANGE_PARK)
       constexpr xyz_pos_t tpxy = TOOLCHANGE_PARK_XY;
+      toolchange_settings.enable_park = true;
       toolchange_settings.change_point = tpxy;
     #endif
+
     toolchange_settings.z_raise = TOOLCHANGE_ZRAISE;
+
+    #if ENABLED(TOOLCHANGE_MIGRATION_FEATURE)
+      migration = migration_defaults;
+    #endif
+
   #endif
 
   #if ENABLED(BACKLASH_GCODE)
@@ -2846,7 +2862,7 @@ void MarlinSettings::reset() {
 
     CONFIG_ECHO_HEADING(
       "Advanced: B<min_segment_time_us> S<min_feedrate> T<min_travel_feedrate>"
-      #if DISABLED(CLASSIC_JERK)
+      #if HAS_JUNCTION_DEVIATION
         " J<junc_dev>"
       #endif
       #if HAS_CLASSIC_JERK
@@ -2859,7 +2875,7 @@ void MarlinSettings::reset() {
         PSTR("  M205 B"), LINEAR_UNIT(planner.settings.min_segment_time_us)
       , PSTR(" S"), LINEAR_UNIT(planner.settings.min_feedrate_mm_s)
       , SP_T_STR, LINEAR_UNIT(planner.settings.min_travel_feedrate_mm_s)
-      #if DISABLED(CLASSIC_JERK)
+      #if HAS_JUNCTION_DEVIATION
         , PSTR(" J"), LINEAR_UNIT(planner.junction_deviation_mm)
       #endif
       #if HAS_CLASSIC_JERK
@@ -3083,7 +3099,7 @@ void MarlinSettings::reset() {
         HOTEND_LOOP() {
           CONFIG_ECHO_START();
           SERIAL_ECHOPAIR_P(
-            #if HAS_MULTI_HOTEND && ENABLED(PID_PARAMS_PER_HOTEND)
+            #if BOTH(HAS_MULTI_HOTEND, PID_PARAMS_PER_HOTEND)
               PSTR("  M301 E"), e,
               SP_P_STR
             #else
