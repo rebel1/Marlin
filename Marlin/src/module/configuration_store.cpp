@@ -94,7 +94,7 @@
   #include "../feature/powerloss.h"
 #endif
 
-#if ENABLED(POWER_MONITOR)
+#if HAS_POWER_MONITOR
   #include "../feature/power_monitor.h"
 #endif
 
@@ -148,7 +148,7 @@ typedef struct {  int16_t X, Y, Z, X2, Y2, Z2, Z3, Z4;                          
 typedef struct {     bool X, Y, Z, X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7; } tmc_stealth_enabled_t;
 
 // Limit an index to an array size
-#define ALIM(I,ARR) _MIN(I, COUNT(ARR) - 1)
+#define ALIM(I,ARR) _MIN(I, signed(COUNT(ARR) - 1))
 
 // Defaults for reset / fill in on load
 static const uint32_t   _DMA[] PROGMEM = DEFAULT_MAX_ACCELERATION;
@@ -3163,16 +3163,16 @@ void MarlinSettings::reset() {
       CONFIG_ECHO_HEADING("Material heatup parameters:");
       LOOP_L_N(i, PREHEAT_COUNT) {
         CONFIG_ECHO_START();
-        SERIAL_ECHOLNPAIR(
-          "  M145 S", (int)i
+        SERIAL_ECHOLNPAIR_P(
+          PSTR("  M145 S"), (int)i
           #if HAS_HOTEND
-            , " H", TEMP_UNIT(ui.material_preset[i].hotend_temp)
+            , PSTR(" H"), TEMP_UNIT(ui.material_preset[i].hotend_temp)
           #endif
           #if HAS_HEATED_BED
-            , " B", TEMP_UNIT(ui.material_preset[i].bed_temp)
+            , SP_B_STR, TEMP_UNIT(ui.material_preset[i].bed_temp)
           #endif
           #if HAS_FAN
-            , " F", ui.material_preset[i].fan_speed
+            , PSTR(" F"), ui.material_preset[i].fan_speed
           #endif
         );
       }
@@ -3198,7 +3198,7 @@ void MarlinSettings::reset() {
             , PSTR(" D"), unscalePID_d(PID_PARAM(Kd, e))
           );
           #if ENABLED(PID_EXTRUSION_SCALING)
-            SERIAL_ECHOPAIR(" C", PID_PARAM(Kc, e));
+            SERIAL_ECHOPAIR_P(SP_C_STR, PID_PARAM(Kc, e));
             if (e == 0) SERIAL_ECHOPAIR(" L", thermalManager.lpq_len);
           #endif
           #if ENABLED(PID_FAN_SCALING)
