@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -185,10 +185,11 @@ int temphot = 0, tempbed = 0;
 float zprobe_zoffset = 0;
 float last_zoffset = 0, last_probe_zoffset = 0;
 
-#define FONT_EEPROM_OFFSET 0
+#define DWIN_LANGUAGE_EEPROM_ADDRESS 0x01   // Between 0x01 and 0x63 (EEPROM_OFFSET-1)
+                                            // BL24CXX::check() uses 0x00
 
 void lcd_select_language(void) {
-  BL24CXX::read(FONT_EEPROM_OFFSET, (uint8_t*)&HMI_flag.language_flag, sizeof(HMI_flag.language_flag));
+  BL24CXX::read(DWIN_LANGUAGE_EEPROM_ADDRESS, (uint8_t*)&HMI_flag.language_flag, sizeof(HMI_flag.language_flag));
   if (HMI_flag.language_flag)
     DWIN_JPG_CacheTo1(Language_Chinese);
   else
@@ -198,12 +199,12 @@ void lcd_select_language(void) {
 void set_english_to_eeprom(void) {
   HMI_flag.language_flag = 0;
   DWIN_JPG_CacheTo1(Language_English);
-  BL24CXX::write(FONT_EEPROM_OFFSET, (uint8_t*)&HMI_flag.language_flag, sizeof(HMI_flag.language_flag));
+  BL24CXX::write(DWIN_LANGUAGE_EEPROM_ADDRESS, (uint8_t*)&HMI_flag.language_flag, sizeof(HMI_flag.language_flag));
 }
 void set_chinese_to_eeprom(void) {
   HMI_flag.language_flag = 1;
   DWIN_JPG_CacheTo1(Language_Chinese);
-  BL24CXX::write(FONT_EEPROM_OFFSET, (uint8_t*)&HMI_flag.language_flag, sizeof(HMI_flag.language_flag));
+  BL24CXX::write(DWIN_LANGUAGE_EEPROM_ADDRESS, (uint8_t*)&HMI_flag.language_flag, sizeof(HMI_flag.language_flag));
 }
 
 void show_plus_or_minus(uint8_t size, uint16_t bColor, uint8_t iNum, uint8_t fNum, uint16_t x, uint16_t y, long value) {
@@ -375,6 +376,10 @@ inline void Clear_Title_Bar(void) {
 }
 
 inline void Draw_Title(const char * const title) {
+  DWIN_Draw_String(false, false, HEADER_FONT, White, Background_blue, 14, 4, (char*)title);
+}
+
+inline void Draw_Title(const __FlashStringHelper * title) {
   DWIN_Draw_String(false, false, HEADER_FONT, White, Background_blue, 14, 4, (char*)title);
 }
 
@@ -567,7 +572,7 @@ inline void Draw_Prepare_Menu() {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Prepare"); // TODO: GET_TEXT_F
+      Draw_Title(GET_TEXT_F(MSG_PREPARE));
     #else
       DWIN_Frame_AreaCopy(1, 178, 2, 271 - 42, 479 - 464 - 1, 14, 8); // "Prepare"
     #endif
@@ -610,7 +615,7 @@ inline void Draw_Control_Menu() {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Control"); // TODO: GET_TEXT_F
+      Draw_Title(GET_TEXT_F(MSG_CONTROL));
     #else
       DWIN_Frame_AreaCopy(1, 128, 2, 271 - 95, 479 - 467, 14, 8);
     #endif
@@ -655,7 +660,7 @@ inline void Draw_Tune_Menu() {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Tune"); // TODO: GET_TEXT
+      Draw_Title(GET_TEXT_F(MSG_TUNE));
     #else
       DWIN_Frame_AreaCopy(1, 94, 2, 271 - 145, 479 - 467, 14, 9);
     #endif
@@ -729,7 +734,7 @@ inline void Draw_Motion_Menu() {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Motion"); // TODO: GET_TEXT_F
+      Draw_Title(GET_TEXT_F(MSG_MOTION));
     #else
       DWIN_Frame_AreaCopy(1, 144, 16, 271 - 82, 479 - 453, 14, 8);
     #endif
@@ -946,7 +951,7 @@ void Goto_MainMenu(void) {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Home"); // TODO: GET_TEXT
+      Draw_Title(GET_TEXT_F(MSG_MAIN));
     #else
       DWIN_Frame_AreaCopy(1, 0, 2, 271 - 232, 479 - 467, 14, 9);
     #endif
@@ -1713,7 +1718,7 @@ inline void Draw_Info_Menu() {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Info"); // TODO: GET_TEXT_F
+      Draw_Title(GET_TEXT_F(MSG_INFO_SCREEN));
     #else
       DWIN_Frame_AreaCopy(1, 190, 16, 271 - 56, 479 - 453, 14, 8);
     #endif
@@ -2090,7 +2095,7 @@ inline void Draw_Move_Menu() {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Move"); // TODO: GET_TEXT_F
+      Draw_Title(GET_TEXT_F(MSG_MOVE_AXIS));
     #else
       DWIN_Frame_AreaCopy(1, 231, 2, 271 - 6, 479 - 467, 14, 8);
     #endif
@@ -2244,7 +2249,7 @@ void Draw_Temperature_Menu() {
   }
   else {
     #ifdef USE_STRING_HEADINGS
-      Draw_Title("Temperature"); // TODO: GET_TEXT_F
+      Draw_Title(GET_TEXT_F(MSG_TEMPERATURE));
     #else
       DWIN_Frame_AreaCopy(1, 56, 16, 271 - 130, 479 - 450 - 1, 14, 8);
     #endif
@@ -2374,7 +2379,7 @@ void HMI_Control(void) {
 void HMI_Leveling(void) {
   Popup_Window_Leveling();
   DWIN_UpdateLCD();
-  queue.inject_P(PSTR("G29"));
+  queue.inject_P(PSTR("G28O\nG29"));
 }
 
 /* Axis Move */
