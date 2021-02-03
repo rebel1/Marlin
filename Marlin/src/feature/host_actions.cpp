@@ -186,7 +186,6 @@ void host_action(PGM_P const pstr, const bool eol) {
           extern const char M24_STR[];
           queue.inject_P(M24_STR);
           #endif
-        #endif
         break;
       case PROMPT_INFO:
         msg = PSTR("GCODE_INFO");
