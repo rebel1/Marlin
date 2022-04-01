@@ -26,7 +26,7 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if HAS_LCD_MENU
+#if HAS_MARLINUI_MENU
 
 #include "menu_item.h"
 #include "../../module/planner.h"
@@ -68,7 +68,7 @@ void menu_backlash();
     START_MENU();
     BACK_ITEM(MSG_ADVANCED_SETTINGS);
     #define EDIT_DAC_PERCENT(A) EDIT_ITEM(uint8, MSG_DAC_PERCENT_##A, &driverPercent[_AXIS(A)], 0, 100, []{ stepper_dac.set_current_percents(driverPercent); })
-    LOGICAL_AXIS_CODE(EDIT_DAC_PERCENT(E), EDIT_DAC_PERCENT(A), EDIT_DAC_PERCENT(B), EDIT_DAC_PERCENT(C), EDIT_DAC_PERCENT(I), EDIT_DAC_PERCENT(J), EDIT_DAC_PERCENT(K));
+    LOGICAL_AXIS_CODE(EDIT_DAC_PERCENT(E), EDIT_DAC_PERCENT(A), EDIT_DAC_PERCENT(B), EDIT_DAC_PERCENT(C), EDIT_DAC_PERCENT(I), EDIT_DAC_PERCENT(J), EDIT_DAC_PERCENT(K), EDIT_DAC_PERCENT(U), EDIT_DAC_PERCENT(V), EDIT_DAC_PERCENT(W));
     ACTION_ITEM(MSG_DAC_EEPROM_WRITE, stepper_dac.commit_eeprom);
     END_MENU();
   }
@@ -84,10 +84,10 @@ void menu_backlash();
     BACK_ITEM(MSG_ADVANCED_SETTINGS);
     #define EDIT_CURRENT_PWM(LABEL,I) EDIT_ITEM_P(long5, PSTR(LABEL), &stepper.motor_current_setting[I], 100, 2000, stepper.refresh_motor_power)
     #if ANY_PIN(MOTOR_CURRENT_PWM_XY, MOTOR_CURRENT_PWM_X, MOTOR_CURRENT_PWM_Y)
-      EDIT_CURRENT_PWM(STR_X STR_Y, 0);
+      EDIT_CURRENT_PWM(STR_A STR_B, 0);
     #endif
     #if PIN_EXISTS(MOTOR_CURRENT_PWM_Z)
-      EDIT_CURRENT_PWM(STR_Z, 1);
+      EDIT_CURRENT_PWM(STR_C, 1);
     #endif
     #if PIN_EXISTS(MOTOR_CURRENT_PWM_E)
       EDIT_CURRENT_PWM(STR_E, 2);
@@ -109,8 +109,8 @@ void menu_backlash();
       #if EXTRUDERS == 1
         EDIT_ITEM(float42_52, MSG_ADVANCE_K, &planner.extruder_advance_K[0], 0, 10);
       #elif HAS_MULTI_EXTRUDER
-        LOOP_L_N(n, EXTRUDERS)
-          EDIT_ITEM_N(float42_52, n, MSG_ADVANCE_K_E, &planner.extruder_advance_K[n], 0, 10);
+        EXTRUDER_LOOP()
+          EDIT_ITEM_N(float42_52, e, MSG_ADVANCE_K_E, &planner.extruder_advance_K[e], 0, 10);
       #endif
     #endif
 
@@ -120,16 +120,16 @@ void menu_backlash();
       #if ENABLED(VOLUMETRIC_EXTRUDER_LIMIT)
         EDIT_ITEM_FAST(float42_52, MSG_VOLUMETRIC_LIMIT, &planner.volumetric_extruder_limit[active_extruder], 0.0f, 20.0f, planner.calculate_volumetric_extruder_limits);
         #if HAS_MULTI_EXTRUDER
-          LOOP_L_N(n, EXTRUDERS)
-            EDIT_ITEM_FAST_N(float42_52, n, MSG_VOLUMETRIC_LIMIT_E, &planner.volumetric_extruder_limit[n], 0.0f, 20.00f, planner.calculate_volumetric_extruder_limits);
+          EXTRUDER_LOOP()
+            EDIT_ITEM_FAST_N(float42_52, e, MSG_VOLUMETRIC_LIMIT_E, &planner.volumetric_extruder_limit[e], 0.0f, 20.00f, planner.calculate_volumetric_extruder_limits);
         #endif
       #endif
 
       if (parser.volumetric_enabled) {
         EDIT_ITEM_FAST(float43, MSG_FILAMENT_DIAM, &planner.filament_size[active_extruder], 1.5f, 3.25f, planner.calculate_volumetric_multipliers);
         #if HAS_MULTI_EXTRUDER
-          LOOP_L_N(n, EXTRUDERS)
-            EDIT_ITEM_FAST_N(float43, n, MSG_FILAMENT_DIAM_E, &planner.filament_size[n], 1.5f, 3.25f, planner.calculate_volumetric_multipliers);
+          EXTRUDER_LOOP()
+            EDIT_ITEM_FAST_N(float43, e, MSG_FILAMENT_DIAM_E, &planner.filament_size[e], 1.5f, 3.25f, planner.calculate_volumetric_multipliers);
         #endif
       }
     #endif
@@ -139,14 +139,14 @@ void menu_backlash();
 
       EDIT_ITEM_FAST(float4, MSG_FILAMENT_UNLOAD, &fc_settings[active_extruder].unload_length, 0, extrude_maxlength);
       #if HAS_MULTI_EXTRUDER
-        LOOP_L_N(n, EXTRUDERS)
-          EDIT_ITEM_FAST_N(float4, n, MSG_FILAMENTUNLOAD_E, &fc_settings[n].unload_length, 0, extrude_maxlength);
+        EXTRUDER_LOOP()
+          EDIT_ITEM_FAST_N(float4, e, MSG_FILAMENTUNLOAD_E, &fc_settings[e].unload_length, 0, extrude_maxlength);
       #endif
 
       EDIT_ITEM_FAST(float4, MSG_FILAMENT_LOAD, &fc_settings[active_extruder].load_length, 0, extrude_maxlength);
       #if HAS_MULTI_EXTRUDER
-        LOOP_L_N(n, EXTRUDERS)
-          EDIT_ITEM_FAST_N(float4, n, MSG_FILAMENTLOAD_E, &fc_settings[n].load_length, 0, extrude_maxlength);
+        EXTRUDER_LOOP()
+          EDIT_ITEM_FAST_N(float4, e, MSG_FILAMENTLOAD_E, &fc_settings[e].load_length, 0, extrude_maxlength);
       #endif
     #endif
 
@@ -356,7 +356,7 @@ void menu_backlash();
       #elif ENABLED(LIMITED_MAX_FR_EDITING)
         DEFAULT_MAX_FEEDRATE
       #else
-        LOGICAL_AXIS_ARRAY(9999, 9999, 9999, 9999, 9999, 9999, 9999)
+        LOGICAL_AXIS_ARRAY(9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999)
       #endif
     ;
     #if ENABLED(LIMITED_MAX_FR_EDITING) && !defined(MAX_FEEDRATE_EDIT_VALUES)
@@ -369,7 +369,7 @@ void menu_backlash();
     BACK_ITEM(MSG_ADVANCED_SETTINGS);
 
     #define EDIT_VMAX(N) EDIT_ITEM_FAST(float5, MSG_VMAX_##N, &planner.settings.max_feedrate_mm_s[_AXIS(N)], 1, max_fr_edit_scaled[_AXIS(N)])
-    LINEAR_AXIS_CODE(EDIT_VMAX(A), EDIT_VMAX(B), EDIT_VMAX(C), EDIT_VMAX(I), EDIT_VMAX(J), EDIT_VMAX(K));
+    NUM_AXIS_CODE(EDIT_VMAX(A), EDIT_VMAX(B), EDIT_VMAX(C), EDIT_VMAX(I), EDIT_VMAX(J), EDIT_VMAX(K), EDIT_VMAX(U), EDIT_VMAX(V), EDIT_VMAX(W));
 
     #if E_STEPPERS
       EDIT_ITEM_FAST(float5, MSG_VMAX_E, &planner.settings.max_feedrate_mm_s[E_AXIS_N(active_extruder)], 1, max_fr_edit_scaled.e);
@@ -399,7 +399,7 @@ void menu_backlash();
       #elif ENABLED(LIMITED_MAX_ACCEL_EDITING)
         DEFAULT_MAX_ACCELERATION
       #else
-        LOGICAL_AXIS_ARRAY(99000, 99000, 99000, 99000, 99000, 99000, 99000)
+        LOGICAL_AXIS_ARRAY(99000, 99000, 99000, 99000, 99000, 99000, 99000, 99000, 99000, 99000)
       #endif
     ;
     #if ENABLED(LIMITED_MAX_ACCEL_EDITING) && !defined(MAX_ACCEL_EDIT_VALUES)
@@ -423,9 +423,10 @@ void menu_backlash();
     EDIT_ITEM_FAST(float5_25, MSG_A_TRAVEL, &planner.settings.travel_acceleration, 25, max_accel);
 
     #define EDIT_AMAX(Q,L) EDIT_ITEM_FAST(long5_25, MSG_AMAX_##Q, &planner.settings.max_acceleration_mm_per_s2[_AXIS(Q)], L, max_accel_edit_scaled[_AXIS(Q)], []{ planner.reset_acceleration_rates(); })
-    LINEAR_AXIS_CODE(
+    NUM_AXIS_CODE(
       EDIT_AMAX(A, 100), EDIT_AMAX(B, 100), EDIT_AMAX(C, 10),
-      EDIT_AMAX(I,  10), EDIT_AMAX(J,  10), EDIT_AMAX(K, 10)
+      EDIT_AMAX(I,  10), EDIT_AMAX(J,  10), EDIT_AMAX(K, 10),
+      EDIT_AMAX(U,  10), EDIT_AMAX(V,  10), EDIT_AMAX(W, 10)
     );
 
     #if ENABLED(DISTINCT_E_FACTORS)
@@ -468,9 +469,10 @@ void menu_backlash();
         #elif ENABLED(LIMITED_JERK_EDITING)
           { LOGICAL_AXIS_LIST((DEFAULT_EJERK) * 2,
                               (DEFAULT_XJERK) * 2, (DEFAULT_YJERK) * 2, (DEFAULT_ZJERK) * 2,
-                              (DEFAULT_IJERK) * 2, (DEFAULT_JJERK) * 2, (DEFAULT_KJERK) * 2) }
+                              (DEFAULT_IJERK) * 2, (DEFAULT_JJERK) * 2, (DEFAULT_KJERK) * 2,
+                              (DEFAULT_UJERK) * 2, (DEFAULT_VJERK) * 2, (DEFAULT_WJERK) * 2) }
         #else
-          { LOGICAL_AXIS_LIST(990, 990, 990, 990, 990, 990, 990) }
+          { LOGICAL_AXIS_LIST(990, 990, 990, 990, 990, 990, 990, 990, 990, 990) }
         #endif
       ;
       #define EDIT_JERK(N) EDIT_ITEM_FAST(float3, MSG_V##N##_JERK, &planner.max_jerk[_AXIS(N)], 1, max_jerk_edit[_AXIS(N)])
@@ -479,9 +481,10 @@ void menu_backlash();
       #else
         #define EDIT_JERK_C() EDIT_ITEM_FAST(float52sign, MSG_VC_JERK, &planner.max_jerk.c, 0.1f, max_jerk_edit.c)
       #endif
-      LINEAR_AXIS_CODE(
+      NUM_AXIS_CODE(
         EDIT_JERK(A), EDIT_JERK(B), EDIT_JERK_C(),
-        EDIT_JERK(I), EDIT_JERK(J), EDIT_JERK(K)
+        EDIT_JERK(I), EDIT_JERK(J), EDIT_JERK(K),
+        EDIT_JERK(U), EDIT_JERK(V), EDIT_JERK(W)
       );
 
       #if HAS_EXTRUDERS
@@ -523,15 +526,16 @@ void menu_advanced_steps_per_mm() {
   START_MENU();
   BACK_ITEM(MSG_ADVANCED_SETTINGS);
 
-  #define EDIT_QSTEPS(Q) EDIT_ITEM_FAST(float51, MSG_##Q##_STEPS, &planner.settings.axis_steps_per_mm[_AXIS(Q)], 5, 9999, []{ planner.refresh_positioning(); })
-  LINEAR_AXIS_CODE(
+  #define EDIT_QSTEPS(Q) EDIT_ITEM_FAST(float61, MSG_##Q##_STEPS, &planner.settings.axis_steps_per_mm[_AXIS(Q)], 5, 9999, []{ planner.refresh_positioning(); })
+  NUM_AXIS_CODE(
     EDIT_QSTEPS(A), EDIT_QSTEPS(B), EDIT_QSTEPS(C),
-    EDIT_QSTEPS(I), EDIT_QSTEPS(J), EDIT_QSTEPS(K)
+    EDIT_QSTEPS(I), EDIT_QSTEPS(J), EDIT_QSTEPS(K),
+    EDIT_QSTEPS(U), EDIT_QSTEPS(V), EDIT_QSTEPS(W)
   );
 
   #if ENABLED(DISTINCT_E_FACTORS)
     LOOP_L_N(n, E_STEPPERS)
-      EDIT_ITEM_FAST_N(float51, n, MSG_EN_STEPS, &planner.settings.axis_steps_per_mm[E_AXIS_N(n)], 5, 9999, []{
+      EDIT_ITEM_FAST_N(float61, n, MSG_EN_STEPS, &planner.settings.axis_steps_per_mm[E_AXIS_N(n)], 5, 9999, []{
         const uint8_t e = MenuItemBase::itemIndex;
         if (e == active_extruder)
           planner.refresh_positioning();
@@ -539,7 +543,7 @@ void menu_advanced_steps_per_mm() {
           planner.mm_per_step[E_AXIS_N(e)] = 1.0f / planner.settings.axis_steps_per_mm[E_AXIS_N(e)];
       });
   #elif E_STEPPERS
-    EDIT_ITEM_FAST(float51, MSG_E_STEPS, &planner.settings.axis_steps_per_mm[E_AXIS], 5, 9999, []{ planner.refresh_positioning(); });
+    EDIT_ITEM_FAST(float61, MSG_E_STEPS, &planner.settings.axis_steps_per_mm[E_AXIS], 5, 9999, []{ planner.refresh_positioning(); });
   #endif
 
   END_MENU();
@@ -653,4 +657,4 @@ void menu_advanced_settings() {
   END_MENU();
 }
 
-#endif // HAS_LCD_MENU
+#endif // HAS_MARLINUI_MENU
