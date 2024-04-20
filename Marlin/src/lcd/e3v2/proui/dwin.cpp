@@ -3145,7 +3145,7 @@ void drawControlMenu() {
         enableLiveCaseLightBrightness = true;  // Allow live update of brightness in control menu
         MENU_ITEM(ICON_CaseLight, MSG_CASE_LIGHT, onDrawSubMenu, drawCaseLightMenu);
       #else
-        MENU_ITEM(ICON_CaseLight, MSG_CASE_LIGHT, onDrawChkbMenu, setCaseLight, &caselight.on);
+        EDIT_ITEM(ICON_CaseLight, MSG_CASE_LIGHT, onDrawChkbMenu, setCaseLight, &caselight.on);
       #endif
     #endif
     #if ENABLED(LED_CONTROL_MENU)
@@ -4014,7 +4014,7 @@ void drawMaxAccelMenu() {
       BACK_ITEM(drawPrepareMenu);
       MENU_ITEM(ICON_Homing, MSG_AUTO_HOME, onDrawMenuItem, autoHome);
       MENU_ITEM(ICON_AxisD, MSG_MOVE_NOZZLE_TO_BED, onDrawMenuItem, setMoveZto0);
-      EDIT_ITEM(ICON_Zoffset, MSG_XATC_UPDATE_Z_OFFSET, onDrawPFloat2Menu, setZOffset, &BABY_Z_VAR);
+      EDIT_ITEM(ICON_Zoffset, MSG_ZPROBE_ZOFFSET, onDrawPFloat2Menu, setZOffset, &BABY_Z_VAR);
     }
     updateMenu(zOffsetWizMenu);
     if (!axis_is_trusted(Z_AXIS)) LCD_MESSAGE_F("WARNING: Z position unknown, move Z to home");
