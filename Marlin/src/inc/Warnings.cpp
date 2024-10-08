@@ -60,7 +60,7 @@
   #endif
 #endif
 
-#if USE_BASE_CONFIGS
+#if !USE_STD_CONFIGS
   #if __has_include("../../Configuration.h")
     #define HAS_IGNORED_CONFIGS
   #elif __has_include("../../Configuration_adv.h")
@@ -920,4 +920,11 @@
  */
 #if defined(ARDUINO_ARCH_HC32) && F_CPU == 200000000
   #warning "HC32 clock is assumed to be 200MHz. If this isn't the case for your board please submit a report so we can add support."
+#endif
+
+/**
+ * Peltier with PIDTEMPBED
+ */
+#if ALL(PELTIER_BED, PIDTEMPBED)
+  #warning "PELTIER_BED with PIDTEMPBED requires extra circuitry. Use with caution."
 #endif
